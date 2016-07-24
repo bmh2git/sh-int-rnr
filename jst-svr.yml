@@ -2,28 +2,13 @@
 - hosts: localhost
   gather_facts: no
   connection: local
-  vars:
-    clc_disk_size_GB: 2 
   tasks:
-    - name: Create a password for the server
-      command: openssl rand -base64 15
-      register: clc_passwd
-      changed_when: false
-    - name: Create the Group for Testing
-      clc_group:
-        name: "SHGRP"
-        location: "CA3"
-        state: present
-      register: clc_group
     - name: Create CLC SRN Server
       clc_server:
         name: "shtst"
         template: ubuntu-14-64
         count: 1
-        group: "{{ clc_group }}"
+        group: "SHGRP"
         location: "CA3"
-        password: "{{ clc_passwd }}"
-        additional_disks:
-          - {path: /SafehavenStorage, sizeGB: "{{ clc_disk_size_GB }}", type: partitioned}
       register: clc
     - debug: var=clc
