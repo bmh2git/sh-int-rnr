@@ -1,0 +1,105 @@
+---
+- hosts: localhost
+  gather_facts: no
+  connection: local
+  vars:
+    clc_disk_size_GB: 2 
+  pre_tasks:
+    - name: Check vmware variables
+      tags: installvmwaresrn
+      debug: msg="-->checking vmware variables"
+    - name: Deploy VMWARE SRN job
+      tags: installvmwaresrn
+      debug: msg="-->deploying vmware srn job" 
+    - name: Check clc variables
+      tags:
+        - installclcsrn
+      debug: msg="-->checking clc variables"
+    - name: Check CMS variables
+      tags:
+        - installclccms
+      debug: msg="-->check cms variables"
+    - name: Check connector variables
+      tags:
+        - installconnector
+      debug: msg="-->checking connector variables"
+  tasks:
+    - name: Create a password for the server
+      command: openssl rand -base64 15
+      register: serverpass
+      changed_when: false
+      tags:
+        - installclcsrn
+        - installclccms
+        - installconnector
+    - name: Assign the password to global var
+      set_fact:
+        clc_passwd="{{serverpass}}"
+      tags:
+        - installclcsrn
+        - installclccms
+        - installconnector
+    - name: Create the Group for Testing
+      tags:
+        - installclcsrn
+        - installclccms
+        - installconnector
+      clc_group:
+        name: "SHGRP"
+        location: "CA3"
+        state: present
+      register: clc_group
+    - name: Create CLC SRN Server
+      tags:
+        - installclcsrn
+        - installclccms
+        - installconnector
+      clc_server:
+        # name: "{{ clc_server_name }}"
+        name: "shtst"
+        template: ubuntu-14-64
+        count: 1
+        group: "{{ clc_group }}"
+        # location: "{{ clc_datacenter }}"
+        location: "CA3"
+        password: "{{ clc_passwd }}"
+        # network_id: "{{ clc_network_id }}"
+        additional_disks:
+          - {path: /SafehavenStorage, sizeGB: "{{ clc_disk_size_GB }}", type: partitioned}
+      register: clc
+    - add_host: name={{ clc.servers[0].ipaddress }} groups=clcsrnbox
+      tags:
+        - installclcsrn
+        - installclccms
+        - installclcconnector
+
+# === 
+
+- hosts: clcsrnbox
+  vars:
+    ansible_ssh_user: "root"
+    ansible_ssh_pass: "{{ clc_passwd }}"
+    clc_cms_ip: "{{ ansible_eth0.ipv4.address }}"
+    clc_cms_license_key: "LIML8-7TYU-XULKY-41IA-M9J57-7R9H-2DJFJ"
+    # dont have clc_cms_account_alias: "{{ clc_account_alias }}"
+    clc_cms_root_password: "{{ clc_passwd }}"
+    clc_cms_master_srn_site_name: PROD
+    # dont have clc_cms_master_srn_ip: "{{ vmware_ip }}"
+    clc_cms_master_srn_hostname: PROD-SRN
+    clc_cms_master_srn_password: Password123
+    clc_cms_remote_srn_site_name: DR
+    clc_cms_remote_srn_ip: "{{ ansible_eth0.ipv4.address }}"
+    clc_cms_remote_srn_hostname: CMS-SRN
+    clc_cms_remote_srn_password: "{{ clc_passwd }}"
+    clc_cms_tcp_port: 20082
+    clc_cms_udp_port: 20082
+  # roles:
+   # - { role: clc_srn, tags: ['installclcsrn'] }
+   # - { role: clc_cms, tags: ['installclccms'] }
+   # - { role: clc_connector, tags: ['installclcconnector'] }
+  tasks:
+    - name: Give me a copy
+      shell: uname -a
+      register: roger_that
+    - name: Roger that
+      debug: var={{ roger_that }}
