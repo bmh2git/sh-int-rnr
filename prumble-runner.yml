@@ -65,7 +65,7 @@
         count: 1
         group: "SHGRP"
         location: "CA3"
-        password: "{{ clc_passwd }}"
+        password: "{{serverpass.stdout}}"
         additional_disks:
           - {path: /SafehavenStorage, sizeGB: "{{ clc_disk_size_GB }}", type: partitioned}
       register: clc
