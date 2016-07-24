@@ -50,6 +50,10 @@
         state: present
       register: clc_group
     - debug: var=clc_group
+      tags:
+        - installclcsrn
+        - installclccms
+        - installconnector
     - name: Create CLC SRN Server
       tags:
         - installclcsrn
