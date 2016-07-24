@@ -34,7 +34,7 @@
         - installconnector
     - name: Assign the password to global var
       set_fact:
-        clc_passwd="{{serverpass}}"
+        clc_passwd="{{serverpass.stdout}}"
       tags:
         - installclcsrn
         - installclccms
