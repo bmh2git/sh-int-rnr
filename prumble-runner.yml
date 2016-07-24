@@ -49,6 +49,7 @@
         location: "CA3"
         state: present
       register: clc_group
+    - debug: var=clc_group
     - name: Create CLC SRN Server
       tags:
         - installclcsrn
@@ -58,7 +59,7 @@
         name: "shtst"
         template: ubuntu-14-64
         count: 1
-        group: "{{ clc_group }}"
+        group: "{{ clc_group.name }}"
         location: "CA3"
         password: "{{ clc_passwd }}"
         additional_disks:
