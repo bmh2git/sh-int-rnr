@@ -69,7 +69,10 @@
         additional_disks:
           - {path: /SafehavenStorage, sizeGB: "{{ clc_disk_size_GB }}", type: partitioned}
       register: clc
-    - add_host: name={{ clc.servers[0].ipaddress }} groups=clcsrnbox ansible_ssh_user=root ansible_ssh_pass={{serverpass.stdout}}
+    - name: wait for ssh to start
+      wait_for: port=22 host={{ clc.servers[0].ipaddress}} delay=5 timeout=320 state=started
+    - name: add host to in-memory inventory
+      add_host: name={{ clc.servers[0].ipaddress }} groups=clcsrnbox ansible_ssh_user=root ansible_ssh_pass={{serverpass.stdout}}
       tags:
         - installclcsrn
         - installclccms
