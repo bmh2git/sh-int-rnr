@@ -55,15 +55,12 @@
         - installclccms
         - installconnector
       clc_server:
-        # name: "{{ clc_server_name }}"
         name: "shtst"
         template: ubuntu-14-64
         count: 1
         group: "{{ clc_group }}"
-        # location: "{{ clc_datacenter }}"
         location: "CA3"
         password: "{{ clc_passwd }}"
-        # network_id: "{{ clc_network_id }}"
         additional_disks:
           - {path: /SafehavenStorage, sizeGB: "{{ clc_disk_size_GB }}", type: partitioned}
       register: clc
