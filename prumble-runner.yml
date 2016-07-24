@@ -80,11 +80,11 @@
 - hosts: clcsrnbox
   vars:
     ansible_ssh_user: "root"
-    ansible_ssh_pass: "{{ clc_passwd }}"
+    ansible_ssh_pass: "{{serverpass.stdout}}"
     clc_cms_ip: "{{ ansible_eth0.ipv4.address }}"
     clc_cms_license_key: "LIML8-7TYU-XULKY-41IA-M9J57-7R9H-2DJFJ"
     # dont have clc_cms_account_alias: "{{ clc_account_alias }}"
-    clc_cms_root_password: "{{ clc_passwd }}"
+    clc_cms_root_password: "{{serverpass.stdout}}"
     clc_cms_master_srn_site_name: PROD
     # dont have clc_cms_master_srn_ip: "{{ vmware_ip }}"
     clc_cms_master_srn_hostname: PROD-SRN
@@ -92,7 +92,7 @@
     clc_cms_remote_srn_site_name: DR
     clc_cms_remote_srn_ip: "{{ ansible_eth0.ipv4.address }}"
     clc_cms_remote_srn_hostname: CMS-SRN
-    clc_cms_remote_srn_password: "{{ clc_passwd }}"
+    clc_cms_remote_srn_password: "{{serverpass.stdout}}"
     clc_cms_tcp_port: 20082
     clc_cms_udp_port: 20082
   # roles:
