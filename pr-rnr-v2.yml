@@ -50,7 +50,7 @@
         group: "{{ clc_group }}"
         location: "{{ clc_datacenter }}"
         password: "{{ clc_passwd }}"
-        network_id: "{{ clc_network_id }}"
+        # network_id: "{{ clc_network_id }}"
         additional_disks:
           - {path: /SafehavenStorage, sizeGB: "{{ clc_disk_size_GB }}", type: partitioned}
       register: clc
