@@ -35,18 +35,6 @@
       fail: msg="Required variable {{ item }} is not defined or empty"
       with_items:
         - vmware_orchestrate_api_key
-        - vmware_account_alias
-        - vmware_vcenter_id
-        - vmware_datacenter
-        - vmware_datastore
-        - vmware_name
-        - vmware_dns
-        - vmware_gateway
-        - vmware_hostname
-        - vmware_ip
-        - vmware_netmask
-        - vmware_vlan
-        - vmware_resource_pool
     - name: Deploy VMWARE SRN job
       tags: installvmwaresrn
       deploy_srn_job:
