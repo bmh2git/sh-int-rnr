@@ -10,22 +10,6 @@
       fail: msg="Required variable {{ item }} is not defined or empty"
       with_items:
         - vmware_orchestrate_api_key
-    - name: Deploy VMWARE SRN job
-      tags: installvmwaresrn
-      deploy_srn_job:
-        orchestrate_api_key: "{{ vmware_orchestrate_api_key }}"
-        account_alias: "{{ vmware_account_alias }}"
-        vcenter_id: "{{ vmware_vcenter_id }}"
-        datacenter: "{{ vmware_datacenter }}"
-        datastore: "{{ vmware_datastore }}"
-        name: "{{ vmware_name }}"
-        dns: "{{ vmware_dns }}"
-        gateway: "{{ vmware_gateway }}"
-        hostname: "{{ vmware_hostname }}"
-        ip: "{{ vmware_ip }}"
-        netmask: "{{ vmware_netmask }}"
-        vlan: "{{ vmware_vlan }}"
-        resource_pool: "{{ vmware_resource_pool }}"
     - name: Check clc variables
       tags:
         - installclcsrn
