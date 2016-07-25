@@ -1,0 +1,145 @@
+# To use, run the following command, replacing $VARIABLES as needed:
+# ansible-playbook --ask-vault-pass --extra-vars "\
+# vmware_orchestrate_api_key=$ORCHESTRATE_API_KEY \
+# vmware_account_alias=dtgd \
+# vmware_vcenter_id=$VCENTER_UUID \
+# vmware_datacenter=/Test-Dev \
+# vmware_datastore=/Test-Dev/datastore/ESX20_500GB \
+# vmware_name=$VMWARE_SRN_NAME \
+# vmware_dns=8.8.8.8 \
+# vmware_gateway=192.168.1.72 \
+# vmware_hostname=$VMWARE_SRN_NAME \
+# vmware_ip=$VMWARE_SRN_IP \
+# vmware_netmask=255.255.0.0 \
+# vmware_vlan='/Test-Dev/network/VM Network' \
+# vmware_resource_pool=/Test-Dev/host/vSphere-5.5-Westmere/Resources/SafeHavenDeploymentAppliance \
+# clc_orchestrate_api_key=$ORCHESTRATE_API_KEY \
+# clc_account_alias=dtgd \
+# clc_connector_uuid=$CLUSTER_UUID \
+# clc_server_name=$CLC_SRN_NAME \
+# clc_group=$CLC_SRN_GROUP \
+# clc_network_id=vlan_520_10.55.220 \
+# clc_passwd=$CLUSTER_ROOT_PASSWORD \
+# clc_datacenter=CA2 \
+# clc_cms_id=1234 \
+# " ./playbook.yml
+- hosts: localhost
+  gather_facts: no
+  connection: local
+  vars:
+    clc_disk_size_GB: 1
+  pre_tasks:
+    - name: Check vmware variables
+      tags: installvmwaresrn
+      when: not {{ item }} is defined or {{ item }} == ''
+      fail: msg="Required variable {{ item }} is not defined or empty"
+      with_items:
+      - vmware_orchestrate_api_key
+      - vmware_account_alias
+      - vmware_vcenter_id
+      - vmware_datacenter
+      - vmware_datastore
+      - vmware_name
+      - vmware_dns
+      - vmware_gateway
+      - vmware_hostname
+      - vmware_ip
+      - vmware_netmask
+      - vmware_vlan
+      - vmware_resource_pool
+    - name: Deploy VMWARE SRN job
+      tags: installvmwaresrn
+      deploy_srn_job:
+        orchestrate_api_key: "{{ vmware_orchestrate_api_key }}"
+        account_alias: "{{ vmware_account_alias }}"
+        vcenter_id: "{{ vmware_vcenter_id }}"
+        datacenter: "{{ vmware_datacenter }}"
+        datastore: "{{ vmware_datastore }}"
+        name: "{{ vmware_name }}"
+        dns: "{{ vmware_dns }}"
+        gateway: "{{ vmware_gateway }}"
+        hostname: "{{ vmware_hostname }}"
+        ip: "{{ vmware_ip }}"
+        netmask: "{{ vmware_netmask }}"
+        vlan: "{{ vmware_vlan }}"
+        resource_pool: "{{ vmware_resource_pool }}"
+    - name: Check clc variables
+      tags:
+      - installclcsrn
+      when: not {{ item }} is defined or {{ item }} == ''
+      fail: msg="Required variable {{ item }} is not defined or empty"
+      with_items:
+      - clc_account_alias
+      - clc_server_name
+      - clc_group
+      - clc_passwd
+      - clc_datacenter
+      - clc_network_id
+    - name: Check CMS variables
+      tags:
+      - installclccms
+      when: not {{ item }} is defined or {{ item }} == ''
+      fail: msg="Required variable {{ item }} is not defined or empty"
+      with_items:
+      - clc_cms_id
+    - name: Check connector variables
+      tags:
+      - installconnector
+      when: not {{ item }} is defined or {{ item }} == ''
+      fail: msg="Required variable {{ item }} is not defined or empty"
+      with_items:
+      - clc_orchestrate_api_key
+      - clc_account_alias
+      - clc_connector_uuid
+    - name: Create CLC SRN Server
+      tags:
+      - installclcsrn
+      - installclccms
+      - installconnector
+      clc_server:
+        name: "{{ clc_server_name }}"
+        template: ubuntu-14-64
+        count: 1
+        group: "{{ clc_group }}"
+        location: "{{ clc_datacenter }}"
+        password: "{{ clc_passwd }}"
+        network_id: "{{ clc_network_id }}"
+        additional_disks:
+        - {path: /SafehavenStorage, sizeGB: "{{ clc_disk_size_GB }}", type: partitioned}
+      register: clc
+    - name: wait for ssh to start
+      wait_for: port=22 host={{ clc.servers[0].ipaddress}} delay=5 timeout=320 state=started
+    - name: add host to in-memory inventory
+      add_host: name={{ clc.servers[0].ipaddress }} groups=clcsrnbox ansible_ssh_user=root ansible_ssh_pass={{clc_passwd}}
+      tags:
+      - installclcsrn
+      - installclccms
+      - installclcconnector
+- hosts: clcsrnbox
+  vars:
+    ansible_ssh_user: "root"
+    ansible_ssh_pass: "{{ clc_passwd }}"
+    clc_cms_ip: "{{ ansible_eth0.ipv4.address }}"
+    clc_cms_license_key: "LIML8-7TYU-X...9J57-7R9H-2DJFJ"
+    clc_cms_account_alias: "{{ clc_account_alias }}"
+    clc_cms_root_password: "{{ clc_passwd }}"
+    clc_cms_master_srn_site_name: PROD
+    clc_cms_master_srn_ip: "{{ vmware_ip }}"
+    clc_cms_master_srn_hostname: PROD-SRN
+    clc_cms_master_srn_password: Passecret3
+    clc_cms_remote_srn_site_name: DR
+    clc_cms_remote_srn_ip: "{{ ansible_eth0.ipv4.address }}"
+    clc_cms_remote_srn_hostname: CMS-SRN
+    clc_cms_remote_srn_password: "{{ clc_passwd }}"
+    clc_cms_tcp_port: 20082
+    clc_cms_udp_port: 20082
+  # roles:
+  #   - { role: clc_srn, tags: ['installclcsrn'] }
+  #   - { role: clc_cms, tags: ['installclccms'] }
+  #   - { role: clc_connector, tags: ['installclcconnector'] }
+  tasks:
+    - name: Give me a copy
+      shell: uname -a
+      register: roger_that
+    - name: Roger that
+      debug: var={{ roger_that }}
