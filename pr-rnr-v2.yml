@@ -1,28 +1,3 @@
-# To use, run the following command, replacing $VARIABLES as needed:
-# ansible-playbook --ask-vault-pass --extra-vars "\
-# vmware_orchestrate_api_key=$ORCHESTRATE_API_KEY \
-# vmware_account_alias=dtgd \
-# vmware_vcenter_id=$VCENTER_UUID \
-# vmware_datacenter=/Test-Dev \
-# vmware_datastore=/Test-Dev/datastore/ESX20_500GB \
-# vmware_name=$VMWARE_SRN_NAME \
-# vmware_dns=8.8.8.8 \
-# vmware_gateway=192.168.1.72 \
-# vmware_hostname=$VMWARE_SRN_NAME \
-# vmware_ip=$VMWARE_SRN_IP \
-# vmware_netmask=255.255.0.0 \
-# vmware_vlan='/Test-Dev/network/VM Network' \
-# vmware_resource_pool=/Test-Dev/host/vSphere-5.5-Westmere/Resources/SafeHavenDeploymentAppliance \
-# clc_orchestrate_api_key=$ORCHESTRATE_API_KEY \
-# clc_account_alias=dtgd \
-# clc_connector_uuid=$CLUSTER_UUID \
-# clc_server_name=$CLC_SRN_NAME \
-# clc_group=$CLC_SRN_GROUP \
-# clc_network_id=vlan_520_10.55.220 \
-# clc_passwd=$CLUSTER_ROOT_PASSWORD \
-# clc_datacenter=CA2 \
-# clc_cms_id=1234 \
-# " ./playbook.yml
 - hosts: localhost
   gather_facts: no
   connection: local
