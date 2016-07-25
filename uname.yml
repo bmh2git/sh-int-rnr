@@ -1,0 +1,9 @@
+---
+- host: all
+  gather_facts: false
+  tasks:
+    - name: uname
+      shell: uname -a
+      register: the_data
+    - name: report
+      debug: var=the_data
