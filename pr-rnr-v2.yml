@@ -88,5 +88,9 @@
     - name: Give me a copy
       shell: uname -a
       register: roger_that
+      tags:
+        - installclcsrn
     - name: Roger that
       debug: var={{ roger_that }}
+      tags:
+        - installclcsrn
