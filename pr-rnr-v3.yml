@@ -1,0 +1,30 @@
+---
+- hosts: localhost
+  gather_facts: no
+  connection: local
+  vars:
+    clc_disk_size_GB: 1
+  pre_tasks:  
+    - name: Create CLC SRN Server
+      clc_server:
+        name: "{{ clc_server_name }}"
+        template: ubuntu-14-64
+        count: 1
+        group: "{{ clc_group }}"
+        location: "{{ clc_datacenter }}"
+        password: "{{ clc_passwd }}"
+        network_id: "{{ clc_network_id }}"
+        additional_disks:
+          - {path: /SafehavenStorage, sizeGB: "{{ clc_disk_size_GB }}", type: partitioned}
+      register: clc
+    - name: wait for ssh to start
+      wait_for: port=22 host={{ clc.servers[0].ipaddress}} delay=5 timeout=320 state=started
+    - name: add host to in-memory inventory
+      add_host: name={{ clc.servers[0].ipaddress }} groups=clcsrnbox ansible_ssh_user=root ansible_ssh_pass={{clc_passwd}}
+- hosts: clcsrnbox
+  tasks:
+    - name: Give me a copy
+      shell: uname -a
+      register: roger_that
+    - name: Roger that
+      debug: var={{ roger_that }}
