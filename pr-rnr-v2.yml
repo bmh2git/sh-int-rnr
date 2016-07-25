@@ -34,19 +34,19 @@
       when: not {{ item }} is defined or {{ item }} == ''
       fail: msg="Required variable {{ item }} is not defined or empty"
       with_items:
-      - vmware_orchestrate_api_key
-      - vmware_account_alias
-      - vmware_vcenter_id
-      - vmware_datacenter
-      - vmware_datastore
-      - vmware_name
-      - vmware_dns
-      - vmware_gateway
-      - vmware_hostname
-      - vmware_ip
-      - vmware_netmask
-      - vmware_vlan
-      - vmware_resource_pool
+        - vmware_orchestrate_api_key
+        - vmware_account_alias
+        - vmware_vcenter_id
+        - vmware_datacenter
+        - vmware_datastore
+        - vmware_name
+        - vmware_dns
+        - vmware_gateway
+        - vmware_hostname
+        - vmware_ip
+        - vmware_netmask
+        - vmware_vlan
+        - vmware_resource_pool
     - name: Deploy VMWARE SRN job
       tags: installvmwaresrn
       deploy_srn_job:
@@ -65,37 +65,37 @@
         resource_pool: "{{ vmware_resource_pool }}"
     - name: Check clc variables
       tags:
-      - installclcsrn
+        - installclcsrn
       when: not {{ item }} is defined or {{ item }} == ''
       fail: msg="Required variable {{ item }} is not defined or empty"
       with_items:
-      - clc_account_alias
-      - clc_server_name
-      - clc_group
-      - clc_passwd
-      - clc_datacenter
-      - clc_network_id
+        - clc_account_alias
+        - clc_server_name
+        - clc_group
+        - clc_passwd
+        - clc_datacenter
+        - clc_network_id
     - name: Check CMS variables
       tags:
-      - installclccms
+        - installclccms
       when: not {{ item }} is defined or {{ item }} == ''
       fail: msg="Required variable {{ item }} is not defined or empty"
       with_items:
-      - clc_cms_id
+        - clc_cms_id
     - name: Check connector variables
       tags:
-      - installconnector
+        - installconnector
       when: not {{ item }} is defined or {{ item }} == ''
       fail: msg="Required variable {{ item }} is not defined or empty"
       with_items:
-      - clc_orchestrate_api_key
-      - clc_account_alias
-      - clc_connector_uuid
+        - clc_orchestrate_api_key
+        - clc_account_alias
+        - clc_connector_uuid
     - name: Create CLC SRN Server
       tags:
-      - installclcsrn
-      - installclccms
-      - installconnector
+        - installclcsrn
+        - installclccms
+        - installconnector
       clc_server:
         name: "{{ clc_server_name }}"
         template: ubuntu-14-64
@@ -105,16 +105,16 @@
         password: "{{ clc_passwd }}"
         network_id: "{{ clc_network_id }}"
         additional_disks:
-        - {path: /SafehavenStorage, sizeGB: "{{ clc_disk_size_GB }}", type: partitioned}
+          - {path: /SafehavenStorage, sizeGB: "{{ clc_disk_size_GB }}", type: partitioned}
       register: clc
     - name: wait for ssh to start
       wait_for: port=22 host={{ clc.servers[0].ipaddress}} delay=5 timeout=320 state=started
     - name: add host to in-memory inventory
       add_host: name={{ clc.servers[0].ipaddress }} groups=clcsrnbox ansible_ssh_user=root ansible_ssh_pass={{clc_passwd}}
       tags:
-      - installclcsrn
-      - installclccms
-      - installclcconnector
+        - installclcsrn
+        - installclccms
+        - installclcconnector
 - hosts: clcsrnbox
   vars:
     ansible_ssh_user: "root"
